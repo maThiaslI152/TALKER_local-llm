@@ -144,15 +144,38 @@ For a more detailed walkthrough and a list of other free providers, please refer
 
 **Note**: The proxy now features a modern **interactive TUI (Text User Interface)** launcher that makes configuration effortless. Run `proxy_app.exe` without arguments to access the full menu system for managing credentials, configuring settings, and running the proxy. The credential manager supports both standard API keys and OAuth credentials (like Gemini CLI), with automatic discovery from environment variables and system directories.
 
-## Cheeki Breekivideo
-- [![Cheeki Breeki](https://img.youtube.com/vi/WmM-PPKTA8s/0.jpg)](https://www.youtube.com/watch?v=WmM-PPKTA8s)
+## Cheeki Breeki's video
+  [![Cheeki Breeki](https://img.youtube.com/vi/WmM-PPKTA8s/0.jpg)](https://www.youtube.com/watch?v=WmM-PPKTA8s)
 
-## using local models
-1. install ollama
-2. ollama pull llama3.2
-3. ollama pull llama3.2:1b
-4. ollama serve
-5. run game and pick local models
+## Using Local Models
+
+> ⚠️ **NOT RECOMMENDED** ⚠️
+> 
+> This option exists for advanced users who are already experienced with local AI hosting.
+> **If you don't already know how to run and evaluate local models, do not use this option.**
+> 
+> TALKER is designed for large cloud-hosted models (100B+ parameters). Local models that run 
+> on consumer hardware are typically 3-32B parameters—significantly smaller and less capable. 
+> This causes real problems:
+> 
+> 1. **Poor instruction following** — TALKER requires models that reliably follow specific 
+>    formats (e.g., "respond with only the speaker's ID"). Smaller models often fail at this, 
+>    returning incorrect formats that break the mod's functionality entirely.
+> 2. **Nonsensical or generic dialogue** — Small models lack the capacity to understand world 
+>    context, character personalities, and STALKER-specific details. Expect responses that are 
+>    off-topic, repetitive, or completely unaware of the situation.
+> 
+> ### No Support Provided
+> 
+> **TALKER does not provide support for local AI models or their hosting.** If you choose this 
+> path, you are on your own. Issues with Ollama, model quality, performance, or "the dialogue 
+> isn't good" are outside the scope of this mod's support.
+
+### Setup
+1. Install [Ollama](https://ollama.ai/)
+2. `ollama pull llama3.2` and `ollama pull llama3.2:1b`
+3. `ollama serve`
+4. In-game, select "Local" in MCM
 
 ## credits
 Many thanks to
