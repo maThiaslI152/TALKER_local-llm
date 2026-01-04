@@ -26,7 +26,7 @@ local queries = require("talker_game_queries")
 
 local last_death_time_ms = 0
 local death_cooldown_ms = 45 * 1000 -- 45 seconds global cooldown for random deaths
-local companion_death_cooldown_ms = 5 * 1000 -- 5 seconds priority cooldown for companions
+local companion_death_cooldown_ms = 2 * 1000 -- 2 seconds priority cooldown for companions (Rapid confirmation)
 
 function on_creature_death(victim_obj, killer_obj)
     -- 1. Validity

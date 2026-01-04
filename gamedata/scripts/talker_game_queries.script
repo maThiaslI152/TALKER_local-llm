@@ -241,7 +241,7 @@ function iterate_nearest(location, distance, fun)
 end
 
 function is_living_character(obj)
-    must_exist(obj, "is_living_character")
+    -- must_exist(obj, "is_living_character") -- Optimization: removed redundant check
     return obj and is_stalker(obj) and obj:alive()
 end
 
@@ -366,7 +366,8 @@ end
 -- Load a translated string from the game's XML files
 function load_xml(input)
     if not input then return "" end
-    key = "talker_" .. input
+    if not input then return "" end
+    local key = "talker_" .. input -- Fix: Localize key
     local result = game.translate_string("talker_" .. input) or game.translate_string(input)
     if result == key then
         log.warn("Translation not found for " .. input)

@@ -313,7 +313,7 @@ function AI_request.generate_dialogue(recent_events, function_send_dialogue_to_g
     logger.info("AI_request.generate_dialogue")
     
     -- Debug Tracker: Start sequence
-    local tracker = require("framework.debug_tracker")
+    -- local tracker = require("framework.debug_tracker") -- Optimization: Already required at top of file
     tracker.start_stage("Choosing Actor")
     
     AI_request.set_witnesses(recent_events)
