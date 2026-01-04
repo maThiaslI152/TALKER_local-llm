@@ -114,6 +114,18 @@ function c.reasoning_level()
     return tonumber(cfg("reasoning_level", -1))
 end
 
+function c.local_url()
+    return cfg("local_url", "http://localhost:11434/api/chat")
+end
+
+function c.local_model_name()
+    return cfg("local_model_name", "llama3.2")
+end
+
+function c.local_model_name_fast()
+    return cfg("local_model_name_fast", "llama3.2:1b")
+end
+
 function c.language()
     return cfg("language", DEFAULT_LANGUAGE)
 end

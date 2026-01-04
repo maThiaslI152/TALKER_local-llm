@@ -8,42 +8,32 @@ function on_mcm_load()
         id = "talker",
         sh = true,
         gr = {
-            -- Model Choice
+            -- Local LLM Configuration
             {
-                id = "gpt_version",
-                type = "radio_h",
-                val = "gpt-4o",
-                def = "gpt-4o",
-                content = {
-                    {"gpt-4o-mini", "gpt-4o-mini"},
-                    {"gpt-4o", "gpt-4o"},
-                    {"gpt-4-turbo", "gpt-4-turbo"}
-                }
+                id = "local_settings_title",
+                type = "desc",
+                clr = {200, 200, 255, 200},
+                text = "ui_mcm_talker_local_settings_title"
             },
             {
-                id = "ai_model_method",
-                type = "radio_h",
-                val = "0",
-                def = "3",
-                content = {
-                    {"0", "open-ai"},
-                    {"1", "open-router-ai"},
-                    {"2", "local-deepseek"},
-                    {"3", "proxy"},
-                }
-            },
-            {
-                id = "custom_ai_model",
+                id = "local_url",
                 type = "input",
-                val = "gemini/gemini-2.5-flash",
-                def = "gemini/gemini-2.5-flash",
+                val = "http://localhost:11434/api/chat",
+                def = "http://localhost:11434/api/chat",
             },
             {
-                id = "custom_ai_model_fast",
+                id = "local_model_name",
                 type = "input",
-                val = "gemini/gemini-2.5-flash-lite",
-                def = "gemini/gemini-2.5-flash-lite",
+                val = "llama3.2",
+                def = "llama3.2",
             },
+            {
+                id = "local_model_name_fast",
+                type = "input",
+                val = "llama3.2:1b",
+                def = "llama3.2:1b",
+            },
+            
             {
                 id = "reasoning_level",
                 type = "radio_h",
@@ -58,19 +48,7 @@ function on_mcm_load()
                 },
                 name = "ui_mcm_talker_reasoning_level"
             },
-            {
-                id = "voice_provider",
-                type = "radio_h",
-                val = "0",
-                def = "2",
-                content = {
-                    {"0", "local-whisper"},
-                    {"1", "openai-whisper"},
-                    {"2", "gemini-proxy"},
-                },
-                name = "ui_mcm_talker_voice_provider"
-            },
- 
+
             -- Language Selection
             {
                 id = "language",
@@ -104,29 +82,6 @@ function on_mcm_load()
                 val = 2,
                 def = DIK_keys.DIK_LMENU
             },
-            -- Input option between voice and text
-            {
-                id = "input_option_title",
-                type = "desc",
-                clr = {200, 200, 255, 200},
-                text = "ui_mcm_talker_input_option_title"
-            },
-            {
-                id = "input_option_description",
-                type = "desc",
-                text = "ui_mcm_talker_input_option_description"
-            },
-            {
-                id = "input_option",
-                type = "radio_h",
-                val = "0",
-                def = "0",
-                content = {
-                    {"0", "voice"},
-                    {"1", "text"},
-                },
-                name = "ui_mcm_talker_input_option"
-            },
         }
     }
     return options
@@ -135,12 +90,10 @@ end
 -- Default configuration values
 local defaults = {
     ["speak_key"] = DIK_keys.DIK_LMENU,
-    ["gpt_version"] = "gpt-4o",
+    ["local_url"] = "http://localhost:11434/api/chat",
+    ["local_model_name"] = "llama3.2",
+    ["local_model_name_fast"] = "llama3.2:1b",
     ["language"] = language.any.long,
-    ["ai_model_method"] = 3,
-    ["custom_ai_model"] = "google/gemini-2.5-flash",
-    ["custom_ai_model_fast"] = "google/gemini-2.5-flash-lite-preview-06-17",
-    ["voice_provider"] = 2,
     ["reasoning_level"] = -1,
 }
 

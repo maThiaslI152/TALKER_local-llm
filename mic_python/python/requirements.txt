@@ -1,8 +1,0 @@
-numpy
-openai
-sounddevice
-soundfile
-watchdog
-httpx
-faster-whisper
-requests
