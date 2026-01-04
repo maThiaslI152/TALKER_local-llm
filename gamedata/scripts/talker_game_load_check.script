@@ -2,11 +2,11 @@ local game = require("infra.game_adapter")
 local log = require('framework.logger')
 
 -- Function called when the game starts
+
 local modules = {
     talker_game_async = "Talker Game Async",
     talker_game_commands = "Talker Game Commands",
     talker_game_queries = "Talker Game Queries",
-    talker_input_mic = "Talker Input Mic",
     talker_input_chatbox = "Talker Input Chatbox",
     talker_trigger_reload = "Talker Trigger Reload",
     talker_game_files = "Talker Game Files",
@@ -33,8 +33,15 @@ function check_loaded_modules()
     if game.is_mock() then
         display_hud_message('Looks like a testing module is loaded, not normal in game. Tell Dan.')
     end
+
     if all_loaded then
         display_hud_message("All TALKER modules loaded")
+        
+        -- Auto-test connection
+        local ollama = require("infra.AI.local_ollama")
+        ollama.test_connection(function(result)
+            display_hud_message("TALKER Connection: " .. result)
+        end)
     end
 end
 

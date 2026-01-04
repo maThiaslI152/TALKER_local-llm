@@ -60,59 +60,16 @@ c.EVENT_WITNESS_RANGE  = 25
 c.NPC_SPEAK_DISTANCE   = 30
 c.BASE_DIALOGUE_CHANCE = 0.25
 c.player_speaks        = false
-c.SHOW_HUD_MESSAGES    = true
-c.PROXY_API_KEY      = "VerysecretKey"
 
-function c.get_openai_api_key()
-    if not c._openai_api_key then
-        c._openai_api_key = load_api_key("openAi_API_KEY", "OPENAI_API_KEY")
-    end
-    if not c._openai_api_key then
-        print("TALKER: Could not find valid OpenAI API key in files or environment variable")
-    end
-    return c._openai_api_key
-end
 
-function c.get_openrouter_api_key()
-    if not c._openrouter_api_key then
-        c._openrouter_api_key = load_api_key("openRouter_API_KEY", "OPENROUTER_API_KEY")
-    end
-    if not c._openrouter_api_key then
-        print("TALKER: Could not find valid OpenRouter API key in files or environment variable")
-    end
-    return c._openrouter_api_key
-end
-
-local DEFAULT_LANGUAGE = language.any.long
-
--- dynamic getters
-function c.is_mic_enabled()
-    return cfg("input_option", "0") == "0"
-end
 
 function c.speak_key()
     return cfg("speak_key", "x")
 end
 
-function c.modelmethod()
-    return tonumber(cfg("ai_model_method", 0))
-end
 
-function c.voice_provider()
-    return tonumber(cfg("voice_provider", 0))
-end
+-- dynamic getters
 
-function c.custom_dialogue_model()
-    return cfg("custom_ai_model", "google/gemini-2.0-flash-001")
-end
-
-function c.custom_dialogue_model_fast()
-    return cfg("custom_ai_model_fast", "openai/gpt-4o-mini")
-end
-
-function c.reasoning_level()
-    return tonumber(cfg("reasoning_level", -1))
-end
 
 function c.local_url()
     return cfg("local_url", "http://localhost:11434/api/chat")
@@ -122,8 +79,17 @@ function c.local_model_name()
     return cfg("local_model_name", "llama3.2")
 end
 
+
 function c.local_model_name_fast()
     return cfg("local_model_name_fast", "llama3.2:1b")
+end
+
+function c.local_url_fast()
+    return cfg("local_url_fast", "http://localhost:11434/api/chat")
+end
+
+function c.use_fast_model()
+    return cfg("use_fast_model", true)
 end
 
 function c.language()
@@ -134,9 +100,7 @@ function c.language_short()
     return language.to_short(c.language())
 end
 
-function c.dialogue_model()
-    return cfg("gpt_version", "gpt-4o")
-end
+
 
 function c.dialogue_prompt()
     return ("You are a dialogue generator for the harsh setting of STALKER. Swear if appropriate. " ..

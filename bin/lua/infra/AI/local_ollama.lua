@@ -26,7 +26,13 @@ local PRESET = {
 }
 
 -- helpers --------------------------------------------------------------
-local function get_api_url()
+
+-- helpers --------------------------------------------------------------
+local function get_api_url(opts)
+    opts = opts or {}
+    if opts.use_fast and config.use_fast_model() then
+        return config.local_url_fast()
+    end
     return config.local_url()
 end
 
@@ -52,13 +58,23 @@ local function send(messages, callback, opts)
   local body_tbl = build_body(messages, opts)
   log.http("Ollama request: %s", json.encode(body_tbl))
 
-  return http.send_async_request(get_api_url(), "POST", headers, body_tbl, function(resp, err)
+
+  -- Pass opts to get_api_url to decide which URL to use
+  return http.send_async_request(get_api_url(opts), "POST", headers, body_tbl, function(resp, err)
     if err or (resp and resp.error) then
       local err_str = type(err)=="table" and json.encode(err) or tostring(err)
       log.error("ollama error: error:" .. err_str .. " body:" .. json.encode(resp))
       error("ollama error: error:" .. err_str .. " body:" .. json.encode(resp))
     end
-    local answer = resp and resp.message and resp.message.content
+    
+    -- Universal Response Parsing (Matches OpenAI/LMStudio AND Ollama)
+    local answer = nil
+    if resp.choices and resp.choices[1] and resp.choices[1].message then
+        answer = resp.choices[1].message.content
+    elseif resp.message then
+        answer = resp.message.content
+    end
+
     log.debug("Ollama response: %s", answer)
     callback(answer)
   end)
@@ -67,15 +83,63 @@ end
 
 -- public shortcuts -----------------------------------------------------
 function ollama.generate_dialogue(msgs, callback)
+  -- Always uses Main (Smart) model
   return send(msgs, callback, PRESET.creative)
 end
 
 function ollama.pick_speaker(msgs, callback)
-  return send(msgs, callback, {model=config.local_model_name_fast(), temperature=0.0, max_tokens=30})
+    local use_fast = config.use_fast_model()
+    local model_name = use_fast and config.local_model_name_fast() or config.local_model_name()
+    
+    return send(msgs, callback, {
+        model = model_name, 
+        temperature = 0.0, 
+        max_tokens = 30,
+        use_fast = use_fast -- flag for get_api_url
+    })
 end
 
 function ollama.summarize_story(msgs, callback)
-  return send(msgs, callback, {model=config.local_model_name_fast(), temperature=0.2, max_tokens=100})
+    local use_fast = config.use_fast_model()
+    local model_name = use_fast and config.local_model_name_fast() or config.local_model_name()
+
+    return send(msgs, callback, {
+        model = model_name, 
+        temperature = 0.2, 
+        max_tokens = 100,
+        use_fast = use_fast -- flag for get_api_url
+    })
+end
+
+
+function ollama.test_connection(callback)
+    local msgs = {{content="State only the word 'OK'."}}
+    
+    log.info("Testing Main Connection...")
+    -- Test Main Model
+    send(msgs, function(response) 
+        if not response then 
+            callback("Main Model Connection FAILED")
+            return 
+        end
+        
+        -- If Fast Model is disabled, we are done
+        if not config.use_fast_model() then
+            callback("Main Model Connection OK!")
+            return
+        end
+        
+        -- Test Fast Model
+        log.info("Testing Fast Connection...")
+        send(msgs, function(response_fast)
+            if not response_fast then
+                callback("Main Model OK. Fast Model FAILED.")
+            else
+                callback("Both Models Connection OK!")
+            end
+        end, {use_fast = true, model = config.local_model_name_fast(), temperature=0.0, max_tokens=10})
+        
+    end, {use_fast = false, model = config.local_model_name(), temperature=0.0, max_tokens=10})
 end
 
 return ollama

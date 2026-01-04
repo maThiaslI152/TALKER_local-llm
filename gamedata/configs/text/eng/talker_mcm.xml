@@ -7,79 +7,44 @@
     <string id="ui_mcm_menu_talker">
         <text>T.A.L.K.E.R.</text>
     </string>
-    <string id="ui_mcm_talker_gpt_version">
-        <text>GPT Model for dialogue</text>
+    
+    <!-- LOCAL SETTINGS -->
+    <string id="ui_mcm_talker_local_settings_title">
+        <text>Local LLM Settings</text>
     </string>
-    <string id="ui_mcm_talker_ai_model_method">
-        <text>Which method/site to use for models</text>
+    
+    <string id="ui_mcm_talker_test_connection_cmd">
+        <text>Test Connection</text>
     </string>
-    <string id="ui_mcm_talker_custom_ai_model">
-        <text>Model for dialogue</text>
+
+    <string id="ui_mcm_talker_local_url">
+        <text>Main Model URL</text>
     </string>
-    <string id="ui_mcm_talker_custom_ai_model_fast">
-        <text>Fast Model for non dialogue</text>
+    <string id="ui_mcm_talker_local_model_name">
+        <text>Main Model Name</text>
     </string>
-    <string id="ui_mcm_talker_reasoning_level">
-        <text>(Proxy) Reasoning Level (Best Auto or None)</text>
+    <string id="ui_mcm_talker_model_smart_desc">
+        <text>Main (Smart) Model: Writing dialogue</text>
     </string>
-    <string id="ui_mcm_talker_voice_provider">
-        <text>Voice Provider</text>
+    
+    <!-- FAST MODEL -->
+    <string id="ui_mcm_talker_use_fast_model">
+        <text>Enable Separate Fast Model</text>
     </string>
-    <!-- MODEL MODE SLECTION -->
-    <string id="ui_mcm_lst_open-ai">
-        <text>OpenAI</text>
+    <string id="ui_mcm_talker_use_fast_model_desc">
+        <text>Use a smaller, faster model (and potentially different URL) for background logic like picking speakers.</text>
     </string>
-    <string id="ui_mcm_lst_open-router-ai">
-        <text>OpenRouter AI</text>
+    
+    <string id="ui_mcm_talker_local_url_fast">
+        <text>Fast Model URL</text>
     </string>
-    <string id="ui_mcm_lst_local-deepseek">
-        <text>Local</text>
+    <string id="ui_mcm_talker_local_model_name_fast">
+        <text>Fast Model Name</text>
     </string>
-    <string id="ui_mcm_lst_proxy">
-        <text>Proxy</text>
+    <string id="ui_mcm_talker_model_fast_desc">
+        <text>Fast Model: Picking speakers / Logic</text>
     </string>
-    <!-- REASONING LEVEL -->
-    <string id="ui_mcm_lst_Auto">
-        <text>Auto</text>
-    </string>
-    <string id="ui_mcm_lst_None">
-        <text>None</text>
-    </string>
-    <string id="ui_mcm_lst_Low">
-        <text>Low</text>
-    </string>
-    <string id="ui_mcm_lst_Medium">
-        <text>Medium</text>
-    </string>
-    <string id="ui_mcm_lst_High">
-        <text>High</text>
-    </string>
-    <!-- VOICE PROVIDER -->
-    <string id="ui_mcm_lst_local-whisper">
-        <text>Local Whisper</text>
-    </string>
-    <string id="ui_mcm_lst_openai-whisper">
-        <text>OpenAI Whisper</text>
-    </string>
-    <string id="ui_mcm_lst_gemini-proxy">
-        <text>Gemini Proxy</text>
-    </string>
-    <!-- Input options -->
-    <string id="ui_mcm_talker_input_option_title">
-        <text>Input Method</text>
-    </string>
-    <string id="ui_mcm_talker_input_option_description">
-        <text>Choose how to provide input: voice or text.</text>
-    </string>
-    <string id="ui_mcm_talker_input_option">
-        <text>Input Mode</text>
-    </string>
-    <string id="ui_mcm_lst_voice">
-        <text>Voice</text>
-    </string>
-    <string id="ui_mcm_lst_text">
-        <text>Text</text>
-    </string>
+
     <!-- LANGUAGE SELECTION -->
     <string id="ui_mcm_talker_language">
         <text>Dialogue language</text>
@@ -96,24 +61,15 @@
     <string id="ui_mcm_lst_Russian">
         <text>Russian</text>
     </string>
-    <!-- GPT MODELS -->
-    <string id="ui_mcm_lst_gpt-4o">
-        <text>GPT-4o</text>
+
+    <!-- CHAT KEY CONFIGURATION -->
+    <string id="ui_mcm_talker_chat_key_title">
+        <text>Chat Key Configuration</text>
     </string>
-    <string id="ui_mcm_lst_gpt-4o-mini">
-        <text>GPT-4o mini</text>
+    <string id="ui_mcm_talker_chat_key_description">
+        <text>Configure the key used to open the text chatbox.</text>
     </string>
-    <string id="ui_mcm_lst_gpt-4-turbo">
-        <text>GPT 4 turbo</text>
-    </string>
-    <!-- SPEAK KEY CONFIGURATION -->
-    <string id="ui_mcm_talker_speak_key_title">
-        <text>Speak Key Configuration</text>
-    </string>
-    <string id="ui_mcm_talker_speak_key_description">
-        <text>Configure the key used to initiate speaking.</text>
-    </string>
-    <string id="ui_mcm_talker_speak_key">
-        <text>Microphone input key.</text>
+    <string id="ui_mcm_talker_chat_key">
+        <text>Chat Key</text>
     </string>
 </string_table>

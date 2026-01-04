@@ -1,7 +1,9 @@
 
 
 
+
 local language = require("infra.language")
+
 
 function on_mcm_load()
     options = {
@@ -15,6 +17,8 @@ function on_mcm_load()
                 clr = {200, 200, 255, 200},
                 text = "ui_mcm_talker_local_settings_title"
             },
+
+
             {
                 id = "local_url",
                 type = "input",
@@ -28,25 +32,41 @@ function on_mcm_load()
                 def = "llama3.2",
             },
             {
+                id = "desc_model_smart",
+                type = "desc",
+                text = "ui_mcm_talker_model_smart_desc" 
+            },
+            
+            -- FAST MODEL TOGGLE
+            {
+                id = "use_fast_model",
+                type = "check",
+                val = 1,
+                def = 1,
+            },
+            {
+                id = "desc_use_fast_model",
+                type = "desc",
+                text = "ui_mcm_talker_use_fast_model_desc" 
+            },
+
+            -- FAST MODEL SETTINGS
+            {
+                id = "local_url_fast",
+                type = "input",
+                val = "http://localhost:11434/api/chat",
+                def = "http://localhost:11434/api/chat",
+            },
+            {
                 id = "local_model_name_fast",
                 type = "input",
                 val = "llama3.2:1b",
                 def = "llama3.2:1b",
             },
-            
             {
-                id = "reasoning_level",
-                type = "radio_h",
-                val = "-1",
-                def = "-1",
-                content = {
-                    {"-1", "Auto"},
-                    {"0", "None"},
-                    {"1", "Low"},
-                    {"2", "Medium"},
-                    {"3", "High"},
-                },
-                name = "ui_mcm_talker_reasoning_level"
+                id = "desc_model_fast",
+                type = "desc",
+                text = "ui_mcm_talker_model_fast_desc" 
             },
 
             -- Language Selection
@@ -64,23 +84,24 @@ function on_mcm_load()
                 name = "ui_mcm_talker_language"
             },
             
-            -- Speak Key UI
+            -- Chat Key UI
             {
-                id = "speak_key_title",
+                id = "chat_key_title",
                 type = "desc",
                 clr = {200, 200, 255, 200},
-                text = "ui_mcm_talker_speak_key_title"
+                text = "ui_mcm_talker_chat_key_title"
             },
             {
-                id = "speak_key_description",
+                id = "chat_key_description",
                 type = "desc",
-                text = "ui_mcm_talker_speak_key_description"
+                text = "ui_mcm_talker_chat_key_description"
             },
             {
-                id = "speak_key",
+                id = "speak_key", -- Keep ID as speak_key for config compatibility
                 type = "key_bind",
                 val = 2,
-                def = DIK_keys.DIK_LMENU
+                def = DIK_keys.DIK_LMENU,
+                text = "ui_mcm_talker_chat_key" -- But change label
             },
         }
     }
@@ -92,9 +113,10 @@ local defaults = {
     ["speak_key"] = DIK_keys.DIK_LMENU,
     ["local_url"] = "http://localhost:11434/api/chat",
     ["local_model_name"] = "llama3.2",
+    ["use_fast_model"] = true,
+    ["local_url_fast"] = "http://localhost:11434/api/chat",
     ["local_model_name_fast"] = "llama3.2:1b",
     ["language"] = language.any.long,
-    ["reasoning_level"] = -1,
 }
 
 -- Function to retrieve the configuration value
