@@ -1,5 +1,5 @@
 # TALKER (Local LLM Fork)
-A specialized fork of the TALKER dialogue generator for STALKER Anomaly, optimized exclusively for **Local LLMs** (Ollama, LM Studio).
+A LLM powered dialogue generator for STALKER Anomaly. This fork is for my own uses because I want to implement my own tweaks and use a localhosted LLM.
 
 ![TALKER](images/talker.png)
 
