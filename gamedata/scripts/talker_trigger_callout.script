@@ -27,9 +27,12 @@ local companion_callout_cooldown_ms = 30 * 1000 -- 30 seconds for companions (An
 
 function is_valid_callout(npc_obj, target_obj)
     -- 1. Basic Validity Checks
+    -- 1. Basic Validity Checks
     if not queries.is_living_character(npc_obj) then return false end
     if not queries.is_alive(target_obj) then return false end -- Fix: Don't spot dead bodies
     
+    local is_companion = queries.is_companion(npc_obj) -- Defined early for use in checks
+
     -- Relation Check
     if not queries.are_enemies(npc_obj, target_obj) then return false end
 
@@ -50,7 +53,6 @@ function is_valid_callout(npc_obj, target_obj)
     if queries.is_in_combat(npc_obj) then return false end
 
     -- 2. Timing Checks
-    local is_companion = queries.is_companion(npc_obj)
     local current_time = time_global() -- Use direct engine time for reliable short-term cooldowns
     local time_diff = current_time - last_callout_time_ms
     
