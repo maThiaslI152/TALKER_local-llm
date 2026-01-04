@@ -22,14 +22,23 @@ local queries = talker_game_queries
 --------------------------------------------------------------------------------------------
 
 local last_callout_time_ms = 0
-local callout_cooldown_ms = 30 * 1000 -- 30 seconds global
-local companion_callout_cooldown_ms = 15 * 1000 -- 15 seconds for companions (Anti-spam)
+local callout_cooldown_ms = 45 * 1000 -- 45 seconds global
+local companion_callout_cooldown_ms = 30 * 1000 -- 30 seconds for companions (Anti-spam)
 
 function is_valid_callout(npc_obj, target_obj)
     -- 1. Basic Validity Checks
     if not queries.is_living_character(npc_obj) then return false end
     if not queries.is_alive(target_obj) then return false end -- Fix: Don't spot dead bodies
+    
+    -- Relation Check
     if not queries.are_enemies(npc_obj, target_obj) then return false end
+
+    -- Companion Alignment: 
+    -- If the spotter is a companion, ensure the target is ALSO an enemy of the player.
+    -- This prevents companions from spotting "normal stalkers" (neutrals) that they might personally dislike due to faction logic.
+    if is_companion and not queries.are_enemies(db.actor, target_obj) then
+        return false
+    end
     
     -- Safe Zone Heuristic:
     -- If a companion has their weapon strapped (holstered), they are likely in a safe zone or relaxed state.
@@ -42,7 +51,8 @@ function is_valid_callout(npc_obj, target_obj)
 
     -- 2. Timing Checks
     local is_companion = queries.is_companion(npc_obj)
-    local time_diff = queries.get_game_time_ms() - last_callout_time_ms
+    local current_time = time_global() -- Use direct engine time for reliable short-term cooldowns
+    local time_diff = current_time - last_callout_time_ms
     
     -- Dynamic Threshold
     local required_cooldown = is_companion and companion_callout_cooldown_ms or callout_cooldown_ms
@@ -54,7 +64,7 @@ function is_valid_callout(npc_obj, target_obj)
     end
     
     -- Reset timer ONLY if valid
-    last_callout_time_ms = queries.get_game_time_ms()
+    last_callout_time_ms = current_time
     return true
 end
 

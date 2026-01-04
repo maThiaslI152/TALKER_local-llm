@@ -76,7 +76,7 @@ function c.memory_threshold()
     
     -- Map integer to profile logic (1=Low, 2=Medium, 3=High)
     if profile == 1 then return 4 -- Low
-    elseif profile == 3 then return 16 -- High
+    elseif profile == 3 then return 24 -- High (increased from 16 to reduce context starvation)
     end
     return 8 -- Medium/Default (2)
 end
@@ -131,6 +131,8 @@ function c.dialogue_prompt()
             "Limit your reply to one sentence of dialogue. " ..
             "Write ONLY dialogue and make it without quotations or leading with the character name. Avoid cliche and corny dialogue " ..
             "Write dialogue that is realistic and appropriate for the tone of the STALKER setting. " ..
+            -- Anti-Hallucination Instruction
+            "Only mention entities explicitly named in the context. Do NOT invent new potential threats or character names. " ..
             "Don't be overly antagonistic if not provoked. " ..
             "Speak %s"
         ):format(c.language())
