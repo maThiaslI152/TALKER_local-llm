@@ -24,6 +24,16 @@ function talker.generate_dialogue(event)
     tracker.reset()
     tracker.start_stage("Triggered")
     
+    local evt = event.description or ""
+    local e_type = "Action"
+    if evt:find("said:") then e_type = "Chat"
+    elseif evt:find("killed") then e_type = "Kill"
+    elseif evt:find("spotted") then e_type = "Spot"
+    elseif evt:find("heard") then e_type = "Hear"
+    elseif evt:find("hit") or evt:find("fighting") then e_type = "Combat"
+    end
+    tracker.set_stage_info("Triggered", "Event: " .. e_type)
+    
     logger.debug("Getting all events since " .. event.game_time_ms - TEN_SECONDS_ms)
     local recent_events = event_store:get_events_since(event.game_time_ms - TEN_SECONDS_ms)
     -- begin a dialogue generation request, input is recent_events, output is speaker_id and dialogue
@@ -38,6 +48,9 @@ function talker.generate_dialogue(event)
 end
 
 function should_someone_speak(event, is_important)
+    -- Important events (like Chat) always trigger
+    if is_important then return true end
+
     -- mostly a placeholder
     -- always should reply to player dialogue
     -- for all others, 25% chance
@@ -46,7 +59,7 @@ function should_someone_speak(event, is_important)
         -- player is only witness
         return false
     end
-    return is_important or math.random() < config.BASE_DIALOGUE_CHANCE
+    return math.random() < config.base_chance()
 end
 
 -- for mocking

@@ -64,7 +64,8 @@ local function send(messages, callback, opts)
     if err or (resp and resp.error) then
       local err_str = type(err)=="table" and json.encode(err) or tostring(err)
       log.error("ollama error: error:" .. err_str .. " body:" .. json.encode(resp))
-      error("ollama error: error:" .. err_str .. " body:" .. json.encode(resp))
+      if callback then callback(nil) end
+      return
     end
     
     -- Universal Response Parsing (Matches OpenAI/LMStudio AND Ollama)

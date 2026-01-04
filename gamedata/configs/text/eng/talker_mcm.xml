@@ -13,8 +13,29 @@
         <text>Local LLM Settings</text>
     </string>
     
-    <string id="ui_mcm_talker_toggle_debug_cmd">
-        <text>Toggle Debug HUD</text>
+    <string id="ui_mcm_talker_base_chance_desc">
+        <text>Dialogue Frequency (Dice Roll Chance) 0.0 - 1.0</text>
+    </string>
+    
+    <string id="ui_mcm_talker_context_profile_desc">
+        <text>Context Memory Profile (Events before compression)</text>
+    </string>
+    <string id="ui_mcm_talker_profile_low">
+        <text>Low (4 Events, Fast)</text>
+    </string>
+    <string id="ui_mcm_talker_profile_medium">
+        <text>Medium (8 Events, Default)</text>
+    </string>
+    <string id="ui_mcm_talker_profile_high">
+        <text>High (16 Events, Deep Context)</text>
+    </string>
+    
+    <string id="ui_mcm_talker_clear_memory_desc">
+        <text>Clear Long-Term Memory on Load (Prevents bloat/lag)</text>
+    </string>
+
+    <string id="ui_mcm_talker_debug_enabled">
+        <text>Enable Debug HUD</text>
     </string>
     
     <string id="ui_mcm_talker_test_connection_cmd">

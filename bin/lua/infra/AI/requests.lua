@@ -123,8 +123,8 @@ function AI_request.pick_speaker(recent_events, compress_memories)
     logger.info("AI_request.pick_speaker")
     -- start function
     local speakers = transformations.pick_potential_speakers(recent_events)
-
-    if not speakers then -- only player
+    
+    if not speakers or #speakers == 0 then -- only player
         logger.warn("No viable speaker found close enough to player")
         tracker.set_fail_reason("No Speakers Nearby")
         return nil
@@ -136,9 +136,18 @@ function AI_request.pick_speaker(recent_events, compress_memories)
     -- Filter out speakers on cooldown
     local available_speakers = filter_speakers_by_cooldown(speakers, current_game_time)
     
+    tracker.set_stage_info("Choosing Actor", "Candidates: " .. #available_speakers .. "/" .. #speakers)
+    
     if #available_speakers == 0 then
+        -- Find shortest wait time for debug info
+        local shortest_wait = 99999
+        for _, speaker in ipairs(speakers) do
+            local remaining = AI_request.get_remaining_cooldown(speaker.game_id, current_game_time)
+            if remaining < shortest_wait then shortest_wait = remaining end
+        end
+        
         logger.warn("All potential speakers are on cooldown")
-        tracker.set_fail_reason("All on Cooldown")
+        tracker.set_fail_reason(string.format("Cooldown (wait %.1fs)", shortest_wait/1000))
         return nil
     end
     
@@ -171,10 +180,15 @@ function AI_request.compress_memories(speaker_id, request_dialogue)
     logger.info("AI_request.compress_memories")
 
     -- Fetch new memories
-    local memories = memory_store:get_current_memories(speaker_id)
-    logger.info("# of memories fetched: " .. #memories)
+    local new_memories = memory_store:get_new_memories(speaker_id)
+    local compressed_memories = memory_store:get_compressed_memories(speaker_id)
+    local all_memories = memory_store:get_current_memories(speaker_id)
+    
+    logger.info("# of memories fetched: " .. #all_memories)
+    
+    tracker.set_stage_info("Memory Store", "New: " .. #new_memories .. " LTM: " .. #compressed_memories)
 
-    local old_memories = transformations.select_old_memories_for_compression(memories)
+    local old_memories = transformations.select_old_memories_for_compression(all_memories)
 
     -- If there are no old memories to compress, just proceed with the dialogue
     if #old_memories == 0 then
@@ -187,6 +201,13 @@ function AI_request.compress_memories(speaker_id, request_dialogue)
     local messages = prompt_builder.create_compress_memories_prompt(old_memories)
     model().summarize_story(messages, function(compressed_memory)
         -- after receiving a response...
+        if not compressed_memory or compressed_memory == "" then
+             logger.warn("Compression failed (LLM returned nil/empty). Skipping compression this turn.")
+             tracker.set_stage_info("Memory Store", "Compression Failed (Skip)")
+             request_dialogue(speaker_id)
+             return
+        end
+        
         logger.info("Compressed memories: " .. compressed_memory)
         memory_store:store_compressed_memory(speaker_id, compressed_memory, game_time_of_oldest_memory)
         request_dialogue(speaker_id)
@@ -209,11 +230,25 @@ function AI_request.request_dialogue(speaker_id, callback)
     return model().generate_dialogue(messages, function(generated_dialogue)
         -- when it responds...
         if generated_dialogue == nil then
-            logger.error("Error generating dialogue")
+            logger.error("Error generating dialogue: nil response")
+            tracker.set_fail_reason("LLM Error (Nil)")
             return
         end
+        if generated_dialogue == "" then
+             logger.warn("Error generating dialogue: empty response")
+             tracker.set_fail_reason("LLM Error (Empty)")
+             return
+        end
+        
         logger.info("Received dialogue: " .. generated_dialogue)
         generated_dialogue = dialogue_cleaner.improve_response_text(generated_dialogue) -- remove censorship and other unwanted content
+        
+        if generated_dialogue == "" then
+             logger.warn("Dialogue cleaner removed everything")
+             tracker.set_fail_reason("Cleaner Removed All")
+             return
+        end
+        
         callback(generated_dialogue)
     end)
 end

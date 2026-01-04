@@ -7,22 +7,40 @@ local personality_store = require('domain.repo.personalities')
 local log = require('framework.logger')
 
 -- Save the data
+local config = require('interface.config')
+
+-- Save the data
 function save_state(saved_data)
     log.info("Saving state...")
-    saved_data.compressed_memories = memory_store:get_save_data()
-    saved_data.events = event_store:get_save_data()
+    
+    if config.clear_memory_on_load() then
+        log.warn("Memory wipe enabled: Saving empty state to clear LTM")
+        saved_data.compressed_memories = {}
+        saved_data.events = {}
+    else
+        saved_data.compressed_memories = memory_store:get_save_data()
+        saved_data.events = event_store:get_save_data()
+    end
+    
     saved_data.personalities = personality_store:get_save_data()
 end
 
 -- Load the data
 function load_state(saved_data)
     log.info("Loading state...")
-    if (saved_data.compressed_memories) then
-         memory_store:load_save_data(saved_data.compressed_memories)
+    
+    if config.clear_memory_on_load() then
+        log.warn("Memory wipe enabled: Skipping load of LTM")
+        -- Do not load events or memories
+    else
+        if (saved_data.compressed_memories) then
+             memory_store:load_save_data(saved_data.compressed_memories)
+        end
+        if (saved_data.events) then
+            event_store:load_save_data(saved_data.events)
+        end
     end
-    if (saved_data.events) then
-        event_store:load_save_data(saved_data.events)
-    end
+    
     if (saved_data.personalities) then
         personality_store.load_save_data(saved_data.personalities)
     end

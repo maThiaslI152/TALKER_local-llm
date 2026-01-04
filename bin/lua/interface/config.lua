@@ -58,8 +58,29 @@ local c = {}
 -- static values
 c.EVENT_WITNESS_RANGE  = 25
 c.NPC_SPEAK_DISTANCE   = 30
-c.BASE_DIALOGUE_CHANCE = 0.25
+c.EVENT_WITNESS_RANGE  = 25
+c.NPC_SPEAK_DISTANCE   = 30
 c.player_speaks        = false
+
+
+function c.base_chance()
+    return cfg("base_chance", 0.25)
+end
+
+function c.clear_memory_on_load()
+    return cfg("clear_memory_on_load", false)
+end
+
+function c.memory_threshold()
+    local profile = cfg("context_profile", "medium")
+    -- Safety: Ensure profile is string and lower case
+    if type(profile) ~= "string" then profile = tostring(profile) end
+    
+    if profile == "low" then return 4
+    elseif profile == "high" then return 16
+    end
+    return 8 -- medium/default
+end
 
 
 
@@ -90,6 +111,10 @@ end
 
 function c.use_fast_model()
     return cfg("use_fast_model", true)
+end
+
+function c.debug_enabled()
+    return cfg("debug_enabled", false)
 end
 
 function c.language()

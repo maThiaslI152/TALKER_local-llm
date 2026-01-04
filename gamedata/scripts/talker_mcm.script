@@ -18,15 +18,7 @@ function on_mcm_load()
                 text = "ui_mcm_talker_local_settings_title"
             },
             
-            { 
-                id = "toggle_debug_cmd",
-                type = "command",
-                text = "ui_mcm_talker_toggle_debug_cmd",
-                val = 2,
-                fun = function() 
-                    talker_debug_hud.toggle_from_mcm()
-                end
-            },
+
 
 
             {
@@ -52,7 +44,7 @@ function on_mcm_load()
                 id = "use_fast_model",
                 type = "check",
                 val = 1,
-                def = 1,
+                def = 0,
             },
             {
                 id = "desc_use_fast_model",
@@ -94,6 +86,53 @@ function on_mcm_load()
                 name = "ui_mcm_talker_language"
             },
             
+            -- Dialogue Frequency
+            {
+                id = "base_chance",
+                type = "track",
+                val = 2,
+                min = 0.0,
+                max = 1.0,
+                step = 0.05,
+                def = 0.25,
+            },
+            {
+                id = "desc_base_chance",
+                type = "desc",
+                text = "ui_mcm_talker_base_chance_desc" 
+            },
+            
+            -- Context Profile
+            {
+                id = "context_profile",
+                type = "list",
+                val = 2,
+                def = "medium",
+                content = {
+                    { "low", "ui_mcm_talker_profile_low" },
+                    { "medium", "ui_mcm_talker_profile_medium" },
+                    { "high", "ui_mcm_talker_profile_high" }
+                }
+            },
+            {
+                id = "desc_context_profile",
+                type = "desc",
+                text = "ui_mcm_talker_context_profile_desc" 
+            },
+
+            -- Clear Memory
+            {
+                id = "clear_memory_on_load",
+                type = "check",
+                val = 1,
+                def = false
+            },
+            {
+                id = "desc_clear_memory",
+                type = "desc",
+                text = "ui_mcm_talker_clear_memory_desc" 
+            },
+            
             -- Chat Key UI
             {
                 id = "chat_key_title",
@@ -113,6 +152,14 @@ function on_mcm_load()
                 def = DIK_keys.DIK_LMENU,
                 text = "ui_mcm_talker_chat_key" -- But change label
             },
+
+            -- Debug Mode
+            {
+                id = "debug_enabled",
+                type = "check",
+                val = 1,
+                def = false
+            }
         }
     }
     return options
@@ -123,10 +170,14 @@ local defaults = {
     ["speak_key"] = DIK_keys.DIK_LMENU,
     ["local_url"] = "http://localhost:11434/api/chat",
     ["local_model_name"] = "llama3.2",
-    ["use_fast_model"] = true,
+    ["use_fast_model"] = false,
     ["local_url_fast"] = "http://localhost:11434/api/chat",
     ["local_model_name_fast"] = "llama3.2:1b",
     ["language"] = language.any.long,
+    ["base_chance"] = 0.25,
+    ["context_profile"] = "medium",
+    ["clear_memory_on_load"] = false,
+    ["debug_enabled"] = false,
 }
 
 -- Function to retrieve the configuration value

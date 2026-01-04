@@ -36,12 +36,12 @@ end
 ------------------------------------------------------------------------------------------------------
 -- Constants for memory management
 ------------------------------------------------------------------------------------------------------
-local MEMORY_COMPRESSION_TRESHHOLD = 8
+local MEMORY_COMPRESSION_TRESHHOLD = 8 -- Fallback, now dynamic
 local AMOUNT_OF_MEMORIES_WE_DONT_COMPRESS = 3
 
 ------------------------------------------------------------------------------------------------------
 function transformation.select_old_memories_for_compression(memories)
-    if #memories <= MEMORY_COMPRESSION_TRESHHOLD then
+    if #memories <= config.memory_threshold() then
         return {}
     end
 

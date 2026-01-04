@@ -19,8 +19,9 @@ function DebugHUD:InitControls()
 
 	self.ui = {}
 	self.ui.main = self.xml:InitStatic("main", self)
-    self.xml:InitStatic("background", self.ui.main)
-	self.xml:InitTextWnd("limit_text", self.ui.main)
+    -- Removed background as requested
+    -- self.xml:InitStatic("background", self.ui.main)
+	self.ui.limit_text = self.xml:InitTextWnd("limit_text", self.ui.main)
 
     self.ui.lines = {}
     self.ui.lines["Triggered"]      = self.xml:InitTextWnd("line_triggered", self.ui.main)
@@ -35,46 +36,58 @@ end
 function DebugHUD:Update()
 	CUIScriptWnd.Update(self)
     
-    local state = tracker.get_state()
-    
-    -- Update Title with Fail Reason
-    local title = "TALKER DEBUG"
-    if state.fail_reason then
-        title = title .. " - FAILED: " .. state.fail_reason
-        self.ui.main:GetChild("limit_text"):SetTextColor(GetARGB(255, 255, 50, 50)) -- Red
-    else
-        self.ui.main:GetChild("limit_text"):SetTextColor(GetARGB(255, 255, 255, 255)) -- White
-    end
-    self.ui.main:GetChild("limit_text"):SetText(title)
-    
-    for _, stage in ipairs(state.stages) do
-        local line = self.ui.lines[stage.name]
-        if line then
-            local text = stage.name .. ": " .. stage.status
-            if stage.duration then
-                text = text .. string.format(" (%.2fs)", stage.duration)
-            elseif stage.status == "running" then
-                -- show live timer
-                local start = state.start_times[stage.name] or os.clock()
-                local current = os.clock() - start
-                text = text .. string.format(" (%.2fs)", current)
+	local state = tracker.get_state()
+	
+	-- Update Title with Fail Reason or just Debug
+	local title = "TALKER DEBUG"
+	if state.fail_reason then
+		title = title .. " - FAILED: " .. state.fail_reason
+		self.ui.limit_text:SetTextColor(GetARGB(255, 255, 50, 50)) -- Red
+	else
+		self.ui.limit_text:SetTextColor(GetARGB(255, 255, 255, 255)) -- White
+	end
+	self.ui.limit_text:SetText(title)
+	
+	for _, stage in ipairs(state.stages) do
+		local line = self.ui.lines[stage.name]
+		if line then
+			local text = stage.name .. ": " .. stage.status
+            
+            -- Append Info if available
+            if stage.info then
+                text = text .. " (" .. stage.info .. ")"
             end
             
-            -- Color coding
-            if stage.status == "running" then
-                line:SetTextColor(GetARGB(255, 255, 255, 0)) -- Yellow
-            elseif stage.status == "done" then
-                line:SetTextColor(GetARGB(255, 0, 255, 0)) -- Green
-            else
-                line:SetTextColor(GetARGB(255, 100, 100, 100)) -- Gray
-            end
-            
-            line:SetText(text)
-        end
-    end
+			if stage.duration then
+				text = text .. string.format(" (%.2fs)", stage.duration)
+			elseif stage.status == "running" then
+				-- show live timer
+				local start = state.start_times[stage.name] or os.clock()
+				local current = os.clock() - start
+				text = text .. string.format(" (%.2fs)", current)
+			end
+			
+			-- Color coding
+			if stage.status == "running" then
+				line:SetTextColor(GetARGB(255, 255, 255, 0)) -- Yellow
+			elseif stage.status == "done" then
+				line:SetTextColor(GetARGB(255, 0, 255, 0)) -- Green
+			elseif stage.status == "failed" then
+				line:SetTextColor(GetARGB(255, 255, 50, 50)) -- Red
+			else
+				line:SetTextColor(GetARGB(255, 100, 100, 100)) -- Gray
+			end
+			
+			line:SetText(text)
+		end
+	end
 end
 
--- Singleton instance
+local config = require("interface.config")
+
+-- ... (DebugHUD class remains) ...
+
+ -- Singleton management via config polling
 local hud_instance = nil
 
 function show()
@@ -93,19 +106,20 @@ function hide()
     end
 end
 
-function toggle()
-    if hud_instance then
-        hide()
-    else
+local last_check = 0
+function on_actor_update()
+    local tg = time_global()
+    if tg < last_check + 1000 then return end -- Check every 1s
+    last_check = tg
+    
+    local enabled = config.debug_enabled()
+    if enabled and not hud_instance then
         show()
+    elseif not enabled and hud_instance then
+        hide()
     end
 end
 
-
-function toggle_from_mcm()
-    toggle()
-end
-
 function on_game_start()
-    -- Keybind removed, use MCM
+    RegisterScriptCallback("actor_on_update", on_actor_update)
 end
