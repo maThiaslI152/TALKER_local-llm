@@ -30,7 +30,7 @@ local AI_request = {}
 AI_request.__index = AI_request
 
 -- Speaker cooldown system
-local COOLDOWN_DURATION_MS = 3 * 1000 -- seconds in milliseconds
+local COOLDOWN_DURATION_MS = 10 * 1000 -- seconds in milliseconds
 local speaker_last_spoke = {} -- table to track when each speaker last spoke
 
 -- to be moved
@@ -163,18 +163,43 @@ function AI_request.pick_speaker(recent_events, callback)
 
     local messages = prompt_builder.create_pick_speaker_prompt(recent_events, available_speakers)
     -- call the model to pick the next speaker
+    -- call the model to pick the next speaker
     return model().pick_speaker(messages, function(picked_speaker_id)
+        if not picked_speaker_id then
+             callback(nil)
+             return
+        end
+
+        logger.debug("Raw Pick Speaker Response: " .. tostring(picked_speaker_id))
+
+        -- Fuzzy match: Look for a valid candidate ID inside the response (Word Boundary Check)
+        local cleaned_id = nil
+        local response_str = tostring(picked_speaker_id)
+        for _, speaker in ipairs(available_speakers) do
+            local id_str = tostring(speaker.game_id)
+            -- Use frontier pattern %f to ensure we match the WHOLE ID, not a substring (e.g., match '65' but not inside '1650')
+            if string.find(response_str, "%f[%d]" .. id_str .. "%f[%D]") then
+                cleaned_id = speaker.game_id
+                break -- Take the first valid matchmaking found
+            end
+        end
+        
+        -- Fallback to original if no fuzzy match found (though fuzzy is strictly more permissive if IDs are distinct)
+        if not cleaned_id then
+            cleaned_id = picked_speaker_id
+        end
+
         -- check if AI picked a valid speaker
-        if not is_valid_speaker(recent_events, picked_speaker_id) then
+        if not is_valid_speaker(recent_events, cleaned_id) then
             callback(nil)
             return
         end
         -- Set the speaker's cooldown
-        set_speaker_last_spoke(picked_speaker_id, current_game_time)
+        set_speaker_last_spoke(cleaned_id, current_game_time)
         -- move on to compress memories step
         -- this is actually a callback given to the pick_speaker function, but it's expected to be compress_memories
         logger.debug('Compressing memories after picking speaker')
-        callback(picked_speaker_id)
+        callback(cleaned_id)
     end)
 end
 

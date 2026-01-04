@@ -64,7 +64,7 @@ c.player_speaks        = false
 
 
 function c.base_chance()
-    return cfg("base_chance", 0.25)
+    return 0.25 -- Fixed 25% chance for ambient/flavor events
 end
 
 function c.clear_memory_on_load()
@@ -72,14 +72,13 @@ function c.clear_memory_on_load()
 end
 
 function c.memory_threshold()
-    local profile = cfg("context_profile", "medium")
-    -- Safety: Ensure profile is string and lower case
-    if type(profile) ~= "string" then profile = tostring(profile) end
+    local profile = cfg("context_profile", 2) -- Default to 2 (Medium)
     
-    if profile == "low" then return 4
-    elseif profile == "high" then return 16
+    -- Map integer to profile logic (1=Low, 2=Medium, 3=High)
+    if profile == 1 then return 4 -- Low
+    elseif profile == 3 then return 16 -- High
     end
-    return 8 -- medium/default
+    return 8 -- Medium/Default (2)
 end
 
 

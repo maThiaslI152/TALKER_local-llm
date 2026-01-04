@@ -36,6 +36,9 @@ end
 function DebugHUD:Update()
 	CUIScriptWnd.Update(self)
     
+	-- Auto-reset tracker if stale (5 seconds after finish/fail)
+	tracker.check_auto_reset(5)
+    
 	local state = tracker.get_state()
 	
 	-- Update Title with Fail Reason or just Debug

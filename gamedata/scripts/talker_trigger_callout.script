@@ -28,7 +28,16 @@ local companion_callout_cooldown_ms = 15 * 1000 -- 15 seconds for companions (An
 function is_valid_callout(npc_obj, target_obj)
     -- 1. Basic Validity Checks
     if not queries.is_living_character(npc_obj) then return false end
+    if not queries.is_alive(target_obj) then return false end -- Fix: Don't spot dead bodies
     if not queries.are_enemies(npc_obj, target_obj) then return false end
+    
+    -- Safe Zone Heuristic:
+    -- If a companion has their weapon strapped (holstered), they are likely in a safe zone or relaxed state.
+    -- This avoids the stack overflow caused by calling xr_combat_ignore.is_enemy directly.
+    if is_companion and not npc_obj:weapon_unstrapped() then
+        return false
+    end
+
     if queries.is_in_combat(npc_obj) then return false end
 
     -- 2. Timing Checks

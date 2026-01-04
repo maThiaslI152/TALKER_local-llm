@@ -32,11 +32,8 @@ function on_mcm_load()
                 type = "input",
                 val = "llama3.2",
                 def = "llama3.2",
-            },
-            {
-                id = "desc_model_smart",
-                type = "desc",
-                text = "ui_mcm_talker_model_smart_desc" 
+                hint = "talker_model_smart_desc",
+                text = "talker_local_model_name"
             },
             
             -- FAST MODEL TOGGLE
@@ -45,11 +42,8 @@ function on_mcm_load()
                 type = "check",
                 val = 1,
                 def = 0,
-            },
-            {
-                id = "desc_use_fast_model",
-                type = "desc",
-                text = "ui_mcm_talker_use_fast_model_desc" 
+                hint = "talker_use_fast_model_desc",
+                text = "talker_use_fast_model"
             },
 
             -- FAST MODEL SETTINGS
@@ -64,11 +58,8 @@ function on_mcm_load()
                 type = "input",
                 val = "llama3.2:1b",
                 def = "llama3.2:1b",
-            },
-            {
-                id = "desc_model_fast",
-                type = "desc",
-                text = "ui_mcm_talker_model_fast_desc" 
+                hint = "talker_model_fast_desc",
+                text = "talker_local_model_name_fast"
             },
 
             -- Language Selection
@@ -86,38 +77,23 @@ function on_mcm_load()
                 name = "ui_mcm_talker_language"
             },
             
-            -- Dialogue Frequency
-            {
-                id = "base_chance",
-                type = "track",
-                val = 2,
-                min = 0.0,
-                max = 1.0,
-                step = 0.05,
-                def = 0.25,
-            },
-            {
-                id = "desc_base_chance",
-                type = "desc",
-                text = "ui_mcm_talker_base_chance_desc" 
-            },
+            -- Dialogue Frequency (REMOVED: Fixed to 0.25)
+            
+            -- Context Profile
             
             -- Context Profile
             {
                 id = "context_profile",
                 type = "list",
                 val = 2,
-                def = "medium",
+                def = 2,
                 content = {
-                    { "low", "ui_mcm_talker_profile_low" },
-                    { "medium", "ui_mcm_talker_profile_medium" },
-                    { "high", "ui_mcm_talker_profile_high" }
-                }
-            },
-            {
-                id = "desc_context_profile",
-                type = "desc",
-                text = "ui_mcm_talker_context_profile_desc" 
+                    { 1, "low" },
+                    { 2, "medium" },
+                    { 3, "high" }
+                },
+                hint = "talker_context_profile_desc",
+                text = "talker_context_profile_desc" 
             },
 
             -- Clear Memory
@@ -125,12 +101,9 @@ function on_mcm_load()
                 id = "clear_memory_on_load",
                 type = "check",
                 val = 1,
-                def = false
-            },
-            {
-                id = "desc_clear_memory",
-                type = "desc",
-                text = "ui_mcm_talker_clear_memory_desc" 
+                def = false,
+                hint = "talker_clear_memory_desc",
+                text = "talker_clear_memory_desc"
             },
             
             -- Chat Key UI
@@ -175,7 +148,7 @@ local defaults = {
     ["local_model_name_fast"] = "llama3.2:1b",
     ["language"] = language.any.long,
     ["base_chance"] = 0.25,
-    ["context_profile"] = "medium",
+    ["context_profile"] = 2,
     ["clear_memory_on_load"] = false,
     ["debug_enabled"] = false,
 }

@@ -82,11 +82,23 @@ local function send(messages, callback, opts)
         local function strip_think(str)
             local s, e = string.find(str, "<think>", 1, true)
             local s2, e2 = string.find(str, "</think>", 1, true)
+            
+            -- Case 1: Complete block found
             if s and e2 and e2 > s then
                 found_think = true
-                -- cut out the block
+                -- cut out the block and recurse
                 return strip_think(string.sub(str, 1, s-1) .. string.sub(str, e2+1))
             end
+            
+            -- Case 2: Truncated block (start found, but no end)
+            if s and not e2 then
+                found_think = true
+                -- If we are thinking but got cut off, we assume NO Answer was generated yet.
+                -- Return empty string to force a retry/fail rather than processing raw thought.
+                log.warn("Truncated <think> block detected. Returning empty string.")
+                return ""
+            end
+
             return str
         end
         
@@ -117,7 +129,7 @@ function ollama.pick_speaker(msgs, callback)
     return send(msgs, callback, {
         model = model_name, 
         temperature = 0.0, 
-        max_tokens = 30,
+        max_tokens = 300,
         use_fast = use_fast -- flag for get_api_url
     })
 end

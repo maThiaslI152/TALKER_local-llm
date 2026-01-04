@@ -22,6 +22,7 @@ function Tracker.reset()
     state.current_stage = "Idle"
     state.fail_reason = nil
     state.start_times = {}
+    state.end_time = nil
     for _, stage in ipairs(state.stages) do
         stage.duration = nil
         stage.status = "pending"
@@ -41,6 +42,7 @@ end
 function Tracker.set_fail_reason(reason)
     state.fail_reason = reason
     state.current_stage = "Failed: " .. reason
+    state.end_time = os.clock() -- Mark end time on failure
     
     -- Close any running stage
     for _, stage in ipairs(state.stages) do
@@ -72,13 +74,24 @@ function Tracker.end_stage(stage_name)
     if start_time then
         local duration = os.clock() - start_time
         
-        for _, stage in ipairs(state.stages) do
+        for i, stage in ipairs(state.stages) do
             if stage.name == stage_name then
                 stage.duration = duration
                 stage.status = "done"
+                
+                -- If this is the last stage, mark end time
+                if i == #state.stages then
+                    state.end_time = os.clock()
+                end
                 break
             end
         end
+    end
+end
+
+function Tracker.check_auto_reset(timeout_seconds)
+    if state.end_time and (os.clock() - state.end_time > timeout_seconds) then
+        Tracker.reset()
     end
 end
 

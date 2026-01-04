@@ -18,16 +18,16 @@
     </string>
     
     <string id="ui_mcm_talker_context_profile_desc">
-        <text>Context Memory Profile (Events before compression)</text>
+        <text>Context Memory Profile (Events before compression). Estimates include system prompt overhead.</text>
     </string>
-    <string id="ui_mcm_talker_profile_low">
-        <text>Low (4 Events, Fast)</text>
+    <string id="ui_mcm_talker_context_profile_lst_low">
+        <text>Low (4 Events, ~340 Tokens)</text>
     </string>
-    <string id="ui_mcm_talker_profile_medium">
-        <text>Medium (8 Events, Default)</text>
+    <string id="ui_mcm_talker_context_profile_lst_medium">
+        <text>Medium (8 Events, ~460 Tokens)</text>
     </string>
-    <string id="ui_mcm_talker_profile_high">
-        <text>High (16 Events, Deep Context)</text>
+    <string id="ui_mcm_talker_context_profile_lst_high">
+        <text>High (16 Events, ~700 Tokens)</text>
     </string>
     
     <string id="ui_mcm_talker_clear_memory_desc">
