@@ -64,6 +64,18 @@ TALKER monitors in-game events (combat, looting, weather changes). When appropri
 *   **Contextual**: NPCs react to what's actually happening (e.g., "Reloading!", "I see a bandit!").
 *   **Unique Personalities**: A Duty veteran speaks differently from a Freedom rookie.
 
+### Recent Update (v1.1)
+*   **Improved Trigger Logic**:
+    *   **Safe Zone Fix**: Companions now intelligently holster their "combat chatter" when their weapon is strapped, preventing spam in bases.
+    *   **Responsive Combat**: "Kill Confirmations" from companions are no longer blocked by previous callouts (reduced cooldown to 2s).
+    *   **Better Reloads**: Reload comments now happen more frequently (25% chance) to add combat flavor.
+*   **MCM Overhaul**:
+    *   Cleaned up UI with tooltips for descriptions.
+    *   Added **Token Estimates** for Context Profile settings (Low/Medium/High) to help with performance tuning.
+    *   Fixed "Context Profile" selection bug.
+*   **Optimization**:
+    *   Internal code cleanup and query optimization for better performance.
+
 ## Credits
 This mod is a fork of the original **TALKER** by **Danclave**.
 
