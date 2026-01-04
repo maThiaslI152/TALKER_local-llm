@@ -17,7 +17,13 @@ end
 
 local TEN_SECONDS_ms = 10 * 1000
 
+
 function talker.generate_dialogue(event)
+    -- Debug Tracker
+    local tracker = require("framework.debug_tracker")
+    tracker.reset()
+    tracker.start_stage("Triggered")
+    
     logger.debug("Getting all events since " .. event.game_time_ms - TEN_SECONDS_ms)
     local recent_events = event_store:get_events_since(event.game_time_ms - TEN_SECONDS_ms)
     -- begin a dialogue generation request, input is recent_events, output is speaker_id and dialogue

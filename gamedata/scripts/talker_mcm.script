@@ -17,6 +17,16 @@ function on_mcm_load()
                 clr = {200, 200, 255, 200},
                 text = "ui_mcm_talker_local_settings_title"
             },
+            
+            { 
+                id = "toggle_debug_cmd",
+                type = "command",
+                text = "ui_mcm_talker_toggle_debug_cmd",
+                val = 2,
+                fun = function() 
+                    talker_debug_hud.toggle_from_mcm()
+                end
+            },
 
 
             {

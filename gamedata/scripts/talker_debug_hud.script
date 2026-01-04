@@ -1,0 +1,111 @@
+-- talker_debug_hud.script
+local tracker = require("framework.debug_tracker")
+local log = require("framework.logger")
+
+class "DebugHUD" (CUIScriptWnd)
+
+function DebugHUD:__init() super()
+	self:InitControls()
+	self:Show(true)
+end
+
+function DebugHUD:__finalize()
+end
+
+function DebugHUD:InitControls()
+	self:SetWndRect(Frect():set(0,0,1024,768))
+	self.xml = CScriptXmlInit()
+	self.xml:ParseFile("talker_debug.xml")
+
+	self.ui = {}
+	self.ui.main = self.xml:InitStatic("main", self)
+    self.xml:InitStatic("background", self.ui.main)
+	self.xml:InitTextWnd("limit_text", self.ui.main)
+
+    self.ui.lines = {}
+    self.ui.lines["Triggered"]      = self.xml:InitTextWnd("line_triggered", self.ui.main)
+    self.ui.lines["Choosing Actor"] = self.xml:InitTextWnd("line_choosing", self.ui.main)
+    self.ui.lines["Memory Store"]   = self.xml:InitTextWnd("line_memory", self.ui.main)
+    self.ui.lines["Sent to LLM"]    = self.xml:InitTextWnd("line_llm", self.ui.main)
+    self.ui.lines["Response"]       = self.xml:InitTextWnd("line_response", self.ui.main)
+    
+    self:Register(self.ui.main, "main_window")
+end
+
+function DebugHUD:Update()
+	CUIScriptWnd.Update(self)
+    
+    local state = tracker.get_state()
+    
+    -- Update Title with Fail Reason
+    local title = "TALKER DEBUG"
+    if state.fail_reason then
+        title = title .. " - FAILED: " .. state.fail_reason
+        self.ui.main:GetChild("limit_text"):SetTextColor(GetARGB(255, 255, 50, 50)) -- Red
+    else
+        self.ui.main:GetChild("limit_text"):SetTextColor(GetARGB(255, 255, 255, 255)) -- White
+    end
+    self.ui.main:GetChild("limit_text"):SetText(title)
+    
+    for _, stage in ipairs(state.stages) do
+        local line = self.ui.lines[stage.name]
+        if line then
+            local text = stage.name .. ": " .. stage.status
+            if stage.duration then
+                text = text .. string.format(" (%.2fs)", stage.duration)
+            elseif stage.status == "running" then
+                -- show live timer
+                local start = state.start_times[stage.name] or os.clock()
+                local current = os.clock() - start
+                text = text .. string.format(" (%.2fs)", current)
+            end
+            
+            -- Color coding
+            if stage.status == "running" then
+                line:SetTextColor(GetARGB(255, 255, 255, 0)) -- Yellow
+            elseif stage.status == "done" then
+                line:SetTextColor(GetARGB(255, 0, 255, 0)) -- Green
+            else
+                line:SetTextColor(GetARGB(255, 100, 100, 100)) -- Gray
+            end
+            
+            line:SetText(text)
+        end
+    end
+end
+
+-- Singleton instance
+local hud_instance = nil
+
+function show()
+    if not hud_instance then
+        hud_instance = DebugHUD()
+    end
+    hud_instance:Show(true)
+    get_hud():AddDialogToRender(hud_instance)
+end
+
+function hide()
+    if hud_instance then
+        get_hud():RemoveDialogToRender(hud_instance)
+        hud_instance:Show(false)
+        hud_instance = nil
+    end
+end
+
+function toggle()
+    if hud_instance then
+        hide()
+    else
+        show()
+    end
+end
+
+
+function toggle_from_mcm()
+    toggle()
+end
+
+function on_game_start()
+    -- Keybind removed, use MCM
+end

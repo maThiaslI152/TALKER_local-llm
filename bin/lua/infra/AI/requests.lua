@@ -20,6 +20,7 @@ local dialogue_cleaner = require("infra.AI.dialogue_cleaner")
 
 
 local local_model = require("infra.AI.local_ollama")
+local tracker = require("framework.debug_tracker")
 
 local model = function()
     return local_model
@@ -125,6 +126,7 @@ function AI_request.pick_speaker(recent_events, compress_memories)
 
     if not speakers then -- only player
         logger.warn("No viable speaker found close enough to player")
+        tracker.set_fail_reason("No Speakers Nearby")
         return nil
     end
     
@@ -136,6 +138,7 @@ function AI_request.pick_speaker(recent_events, compress_memories)
     
     if #available_speakers == 0 then
         logger.warn("All potential speakers are on cooldown")
+        tracker.set_fail_reason("All on Cooldown")
         return nil
     end
     
@@ -236,18 +239,35 @@ function AI_request.set_witnesses(recent_events)
     AI_request.witnesses = recent_events[#recent_events].witnesses
 end
 
+
 -- Sequencing function
 function AI_request.generate_dialogue(recent_events, function_send_dialogue_to_game)
     logger.info("AI_request.generate_dialogue")
+    
+    -- Debug Tracker: Start sequence
+    local tracker = require("framework.debug_tracker")
+    tracker.start_stage("Choosing Actor")
+    
     AI_request.set_witnesses(recent_events)
     -- first we ask the AI to pick the character that should speak next
     AI_request.pick_speaker(recent_events, function(speaker_id)
+        tracker.end_stage("Choosing Actor")
+        tracker.start_stage("Memory Store")
+        
         -- then we compress the memories of the speaker
         AI_request.compress_memories(speaker_id, function()
+            tracker.end_stage("Memory Store")
+            tracker.start_stage("Sent to LLM")
+            
             -- finally we request the dialogue of the speaker
             AI_request.request_dialogue(speaker_id, function(dialogue)
+                tracker.end_stage("Sent to LLM")
+                tracker.start_stage("Response")
+                
                 -- then we call the initial callback with that dialogue
                 function_send_dialogue_to_game(speaker_id, dialogue)
+                
+                tracker.end_stage("Response")
             end)
         end)
     end)

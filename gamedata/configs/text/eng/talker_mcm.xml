@@ -13,6 +13,10 @@
         <text>Local LLM Settings</text>
     </string>
     
+    <string id="ui_mcm_talker_toggle_debug_cmd">
+        <text>Toggle Debug HUD</text>
+    </string>
+    
     <string id="ui_mcm_talker_test_connection_cmd">
         <text>Test Connection</text>
     </string>
