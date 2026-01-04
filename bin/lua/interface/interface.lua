@@ -34,7 +34,7 @@ function m.register_game_event(unformatted_description, event_objects, witnesses
     if not check_format_sanity(unformatted_description, event_objects) then return end
     local success, error = pcall(register_game_event, unformatted_description, event_objects, witnesses, important)
     if not success then
-        log.error("Failed to register game event: %s", error)
+        log.error("Failed to register game event: " .. tostring(error))
     end
 end
 
@@ -50,6 +50,12 @@ function m.player_character_speaks(dialogue)
     m.register_game_event_near_player("%s said: %s", {player.name, dialogue}, true )
     -- show dialogue in game UI
     game_adapter.display_dialogue(player.game_id, dialogue)
+end
+
+function m.register_character_instructions(unformatted_description, character)
+    local witnesses = game_adapter.get_characters_near_player()
+    -- Mark as important so it ignores base_chance dice roll (since it has its own timer)
+    m.register_game_event(unformatted_description, {character}, witnesses, true)
 end
 
 return m

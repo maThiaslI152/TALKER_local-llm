@@ -204,6 +204,10 @@ function is_in_combat(npc)
     if is_player(npc) then
         return #get_enemies_fighting_player() ~= 0
     end
+    -- If they have an active best enemy, they are in combat (regardless of scheme)
+    if npc:best_enemy() and npc:best_enemy():alive() then
+        return true
+    end
     return is_npc_in_combat(npc) or is_enemy_fighting_player(npc) -- doesnt seem reliable?
 end
 

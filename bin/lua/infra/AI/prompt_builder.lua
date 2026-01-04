@@ -154,6 +154,16 @@ function prompt_builder.create_dialogue_request_prompt(speaker, memories)
         table.insert(messages, system_message(last_ten_memories[#last_ten_memories].world_context))
     end
 
+    -- Check last memory for spot event and enforce concise callouts
+    if #last_ten_memories > 0 then
+        local last_memory = last_ten_memories[#last_ten_memories]
+        local last_content = last_memory.content or Event.describe_short(last_memory)
+        if string.find(last_content, "spotted a") then
+            logger.info("Injecting military callout instruction for spot event")
+            table.insert(messages, system_message("The situation is urgent (enemy spotted). Your response MUST be a short, military-style callout (e.g., 'Bandits, 12 o'clock!', 'Contact front!', 'Enemy spotted!'). Do NOT write full sentences or conversational dialogue."))
+        end
+    end
+
     local weapon_info = ""
     if speaker.weapon then
         weapon_info = " who is carrying a " .. speaker.weapon

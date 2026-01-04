@@ -15,10 +15,15 @@ function talker.register_event(event, is_important)
     end
 end
 
+local is_processing = false
 local TEN_SECONDS_ms = 10 * 1000
 
-
 function talker.generate_dialogue(event)
+    if is_processing then
+        logger.warn("talker.generate_dialogue: BUSY processing another request. Dropping event.")
+        return
+    end
+
     -- Debug Tracker
     local tracker = require("framework.debug_tracker")
     tracker.reset()
@@ -36,8 +41,17 @@ function talker.generate_dialogue(event)
     
     logger.debug("Getting all events since " .. event.game_time_ms - TEN_SECONDS_ms)
     local recent_events = event_store:get_events_since(event.game_time_ms - TEN_SECONDS_ms)
+    
+    is_processing = true
     -- begin a dialogue generation request, input is recent_events, output is speaker_id and dialogue
     AI_request.generate_dialogue(recent_events, function(speaker_id, dialogue)
+        is_processing = false -- Release lock
+        
+        if not speaker_id then
+             logger.info("talker.generate_dialogue: No dialogue generated (speaker_id nil). Lock released.")
+             return
+        end
+
         -- on response:
         logger.info("talker.generate_dialogue: dialogue generated for speaker_id: " .. speaker_id .. ", dialogue: " .. dialogue)
 

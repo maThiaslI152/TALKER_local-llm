@@ -22,16 +22,31 @@ local queries = talker_game_queries
 --------------------------------------------------------------------------------------------
 
 local last_callout_time_ms = 0
-local callout_cooldown_ms = 30 * 1000 -- 30 seconds
+local callout_cooldown_ms = 30 * 1000 -- 30 seconds global
+local companion_callout_cooldown_ms = 15 * 1000 -- 15 seconds for companions (Anti-spam)
+
 function is_valid_callout(npc_obj, target_obj)
-    is_valid =
-        (queries.get_game_time_ms() - last_callout_time_ms) > callout_cooldown_ms   and
-        queries.is_living_character(npc_obj)                                        and
-        queries.are_enemies(npc_obj, target_obj)                                    and
-        not queries.is_in_combat(npc_obj)
-    -- reset cooldown
-    if is_valid then last_callout_time_ms = queries.get_game_time_ms() end
-    return is_valid
+    -- 1. Basic Validity Checks
+    if not queries.is_living_character(npc_obj) then return false end
+    if not queries.are_enemies(npc_obj, target_obj) then return false end
+    if queries.is_in_combat(npc_obj) then return false end
+
+    -- 2. Timing Checks
+    local is_companion = queries.is_companion(npc_obj)
+    local time_diff = queries.get_game_time_ms() - last_callout_time_ms
+    
+    -- Dynamic Threshold
+    local required_cooldown = is_companion and companion_callout_cooldown_ms or callout_cooldown_ms
+    local timer_ok = time_diff > required_cooldown
+    
+    -- Check
+    if not timer_ok then
+        return false
+    end
+    
+    -- Reset timer ONLY if valid
+    last_callout_time_ms = queries.get_game_time_ms()
+    return true
 end
 
 ---------------------------------------------------------------------------------------------

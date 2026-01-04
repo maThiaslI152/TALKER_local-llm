@@ -147,8 +147,14 @@ function m.get_distance_to_player(obj_id)
 end
 
 -- to be moved
+
 function m.is_player(character_id)
     return tostring(character_id) == "0"
+end
+
+function m.is_companion(character_id)
+    local obj = query.get_obj_by_id(character_id)
+    return obj and query.is_companion(obj)
 end
 
 

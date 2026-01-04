@@ -119,7 +119,7 @@ local function is_valid_speaker(recent_events, picked_speaker_id)
     return true
 end
 
-function AI_request.pick_speaker(recent_events, compress_memories)
+function AI_request.pick_speaker(recent_events, callback)
     logger.info("AI_request.pick_speaker")
     -- start function
     local speakers = transformations.pick_potential_speakers(recent_events)
@@ -127,6 +127,7 @@ function AI_request.pick_speaker(recent_events, compress_memories)
     if not speakers or #speakers == 0 then -- only player
         logger.warn("No viable speaker found close enough to player")
         tracker.set_fail_reason("No Speakers Nearby")
+        callback(nil)
         return nil
     end
     
@@ -148,6 +149,7 @@ function AI_request.pick_speaker(recent_events, compress_memories)
         
         logger.warn("All potential speakers are on cooldown")
         tracker.set_fail_reason(string.format("Cooldown (wait %.1fs)", shortest_wait/1000))
+        callback(nil)
         return nil
     end
     
@@ -156,20 +158,23 @@ function AI_request.pick_speaker(recent_events, compress_memories)
         local selected_speaker_id = available_speakers[1].game_id
         set_speaker_last_spoke(selected_speaker_id, current_game_time) -- Set cooldown
         logger.debug('Compressing memories after picking speaker')
-        return compress_memories(selected_speaker_id)
+        return callback(selected_speaker_id)
     end
 
     local messages = prompt_builder.create_pick_speaker_prompt(recent_events, available_speakers)
     -- call the model to pick the next speaker
     return model().pick_speaker(messages, function(picked_speaker_id)
         -- check if AI picked a valid speaker
-        if not is_valid_speaker(recent_events, picked_speaker_id) then return end
+        if not is_valid_speaker(recent_events, picked_speaker_id) then
+            callback(nil)
+            return
+        end
         -- Set the speaker's cooldown
         set_speaker_last_spoke(picked_speaker_id, current_game_time)
         -- move on to compress memories step
         -- this is actually a callback given to the pick_speaker function, but it's expected to be compress_memories
         logger.debug('Compressing memories after picking speaker')
-        compress_memories(picked_speaker_id)
+        callback(picked_speaker_id)
     end)
 end
 
@@ -232,11 +237,13 @@ function AI_request.request_dialogue(speaker_id, callback)
         if generated_dialogue == nil then
             logger.error("Error generating dialogue: nil response")
             tracker.set_fail_reason("LLM Error (Nil)")
+            callback(nil)
             return
         end
         if generated_dialogue == "" then
              logger.warn("Error generating dialogue: empty response")
              tracker.set_fail_reason("LLM Error (Empty)")
+             callback(nil)
              return
         end
         
@@ -246,6 +253,7 @@ function AI_request.request_dialogue(speaker_id, callback)
         if generated_dialogue == "" then
              logger.warn("Dialogue cleaner removed everything")
              tracker.set_fail_reason("Cleaner Removed All")
+             callback(nil)
              return
         end
         
@@ -286,6 +294,11 @@ function AI_request.generate_dialogue(recent_events, function_send_dialogue_to_g
     AI_request.set_witnesses(recent_events)
     -- first we ask the AI to pick the character that should speak next
     AI_request.pick_speaker(recent_events, function(speaker_id)
+        if not speaker_id then
+             tracker.set_fail_reason("No Speaker Picked")
+             function_send_dialogue_to_game(nil, nil)
+             return
+        end
         tracker.end_stage("Choosing Actor")
         tracker.start_stage("Memory Store")
         

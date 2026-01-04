@@ -7,6 +7,12 @@ local transformation = {}
 transformation.__index = transformation
 
 local function is_too_far_to_speak(character)
+    -- bypass distance check for companions
+    if game.is_companion(character.game_id) then
+        logger.debug("Character %s is a companion, bypassing distance check", character.game_id)
+        return false
+    end
+
     local distance = game.get_distance_to_player(character.game_id) 
     local result = distance > config.NPC_SPEAK_DISTANCE
     if result == true then

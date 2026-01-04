@@ -22,7 +22,33 @@ end
 -- CALLBACK
 --------------------------------------------------------------------------------------------
 
+local queries = require("talker_game_queries")
+
+local last_death_time_ms = 0
+local death_cooldown_ms = 45 * 1000 -- 45 seconds global cooldown for random deaths
+local companion_death_cooldown_ms = 5 * 1000 -- 5 seconds priority cooldown for companions
+
 function on_creature_death(victim_obj, killer_obj)
+    -- 1. Validity
+    if not queries.is_living_character(killer_obj) then return end -- Only care if killer is alive (e.g. not anomaly)
+
+    -- 2. Priority Logic
+    local is_companion_kill = queries.is_companion(killer_obj)
+    local time_diff = queries.get_game_time_ms() - last_death_time_ms
+    
+    -- Dynamically select threshold
+    local required_cooldown = is_companion_kill and companion_death_cooldown_ms or death_cooldown_ms
+    local timer_ok = time_diff > required_cooldown
+    
+    -- If timer is NOT ready, skip it
+    if not timer_ok then
+        return
+    end
+    
+    -- Update timer (even for companion kills, reset the global timer to avoid immediate spam of non-companion confirmation?)
+    -- Let's say yes, if HiP kills something, we don't need to hear about a random dog 1 second later.
+    last_death_time_ms = queries.get_game_time_ms()
+
     local unformatted_description = "%s was killed by %s!"
     -- get and combine witnesses
     local witnesses_near_victim = game.get_characters_near(victim_obj)
@@ -32,7 +58,7 @@ function on_creature_death(victim_obj, killer_obj)
     local killer = game.create_character(killer_obj)
     local victim = game.create_character(victim_obj)
     -- decide if the kill is important
-    local important = false -- TODO mechanism to decide if kill is important
+    local important = true -- Important because we rely on the specific cooldowns (45s/5s) rather than a random chance
     -- send event to mod
     interface.register_game_event(unformatted_description, {victim, killer}, witnesses, important)
 end

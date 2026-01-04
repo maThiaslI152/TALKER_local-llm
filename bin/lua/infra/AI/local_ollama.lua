@@ -76,6 +76,28 @@ local function send(messages, callback, opts)
         answer = resp.message.content
     end
 
+    -- Reasoning Model Support (Strip <think> blocks)
+    if answer then
+        local found_think = false
+        local function strip_think(str)
+            local s, e = string.find(str, "<think>", 1, true)
+            local s2, e2 = string.find(str, "</think>", 1, true)
+            if s and e2 and e2 > s then
+                found_think = true
+                -- cut out the block
+                return strip_think(string.sub(str, 1, s-1) .. string.sub(str, e2+1))
+            end
+            return str
+        end
+        
+        local clean_answer = strip_think(answer)
+        if found_think then
+            log.warn("Performance Warning: Detected 'Regioning Model' (<think> tags). This adds massive latency (5s+). Recommend using a standard Instruct model for speed.")
+            log.debug("Stripped <think> block. Original Length: " .. #answer .. " Clean Length: " .. #clean_answer)
+            answer = clean_answer
+        end
+    end
+
     log.debug("Ollama response: %s", answer)
     callback(answer)
   end)
