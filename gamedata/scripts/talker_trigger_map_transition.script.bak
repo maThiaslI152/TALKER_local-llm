@@ -32,7 +32,7 @@ function on_map_change_event(previous_map, current_map)
     local current_map_description = locations.describe_location_detailed(current_map)
 
     local witnesses = game.get_companions()
-    witnesses[#witnesses+1] = game.get_player_character()
+    table.insert(witnesses, game.get_player_character())
     interface.register_game_event("you traveled from %s to %s %s.", {previous_map_name, current_map_description, visit_amount}, witnesses, true)
 end
 
@@ -52,7 +52,7 @@ end
 function on_loading_screen_dismissed_safe()
     local status, err = pcall(on_loading_screen_dismissed)
     if not status then
-        -- print("Error in on_loading_screen_dismissed_safe: " .. err)
+        print("Error in on_loading_screen_dismissed_safe: " .. err)
     end
 end
 

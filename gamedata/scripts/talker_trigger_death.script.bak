@@ -10,10 +10,10 @@ local log = require('framework.logger')
 local function join_tables(table1, table2)
     local result = {}
     for _, value in ipairs(table1) do
-        result[#result+1] = value
+        table.insert(result, value)
     end
     for _, value in ipairs(table2) do
-        result[#result+1] = value
+        table.insert(result, value)
     end
     return result
 end

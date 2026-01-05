@@ -6,10 +6,10 @@ local interface = require("interface.interface")
 ----------------------------------------------------------------------------------------------------
 -- Constants
 ----------------------------------------------------------------------------------------------------
-PSY_STORM = "psy storm"
-EMISSION = "emissions"
-START = "starting"
-END = "ending"
+local PSY_STORM = "psy storm"
+local EMISSION = "emissions"
+local START = "starting"
+local END = "ending"
 
 ----------------------------------------------------------------------------------------------------
 -- Function

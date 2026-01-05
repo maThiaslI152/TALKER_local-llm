@@ -259,7 +259,7 @@ function get_nearby_characters(center_object, distance, max, exclusion_list)
     local count = 0
     local function on_each_object(obj)
         if is_living_character(obj) then
-            characters[#characters+1] = obj
+            table.insert(characters, obj)
 
             count = count + 1
             if max and count >= max then
@@ -282,7 +282,7 @@ function get_companions(exclude_npc_id)
     for _, npc_id in ipairs(companion_table) do
         local npc_obj = get_obj_by_id(npc_id)
         if npc_obj and npc_obj:alive() and npc_id ~= exclude_npc_id then
-            filtered_companion_table[#filtered_companion_table+1] = npc_obj
+            table.insert(filtered_companion_table, npc_obj)
         end
     end
 
@@ -384,7 +384,7 @@ function load_random_xml(input)
         local key = baseKey .. "_" .. i
         local translation = game.translate_string(key)
         if translation == key then break end
-        translations[#translations+1] = translation
+        table.insert(translations, translation)
         i = i + 1
     end
     if #translations > 0 then

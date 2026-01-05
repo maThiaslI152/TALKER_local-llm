@@ -6,7 +6,7 @@ local language = require("infra.language")
 
 
 function on_mcm_load()
-    options = {
+local options = {
         id = "talker",
         sh = true,
         gr = {

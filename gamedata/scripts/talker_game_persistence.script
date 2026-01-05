@@ -10,7 +10,7 @@ local log = require('framework.logger')
 local config = require('interface.config')
 
 -- Save the data
-function save_state(saved_data)
+local function save_state(saved_data)
     log.info("Saving state...")
     
     if config.clear_memory_on_load() then
@@ -26,7 +26,7 @@ function save_state(saved_data)
 end
 
 -- Load the data
-function load_state(saved_data)
+local function load_state(saved_data)
     log.info("Loading state...")
     
     if config.clear_memory_on_load() then
