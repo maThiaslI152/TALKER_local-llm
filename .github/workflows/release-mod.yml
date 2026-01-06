@@ -1,0 +1,26 @@
+name: Release Mod
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release-mod:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create Zip Archive
+        run: |
+          zip -r talker-mod.zip gamedata bin README.md LICENSE
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: talker-mod.zip
+          generate_release_notes: true

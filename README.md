@@ -14,6 +14,10 @@ This version of TALKER has been refactored to remove all dependencies on paid AP
 *   **Optimized Performance**: Stripped of bloat from unused features (voice, proxies).
 *   **Universal Compatibility**: Supports both Ollama native API (`/api/chat`) and OpenAI-compatible endpoints (`/v1/chat/completions`) out of the box.
 
+## 📖 New to AI?
+**[👉 Click here for the Complete Beginner's Guide & Hardware Recommendations](USER_MANUAL.md)**
+*(Contains VRAM tiers and step-by-step setup instructions)*
+
 ## Installation
 
 ### Prerequisites
