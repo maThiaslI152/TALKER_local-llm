@@ -2,13 +2,52 @@ package.path = package.path .. ";./bin/lua/?.lua;"
 local log = require("framework.logger")
 local config = require("interface.config")
 
+--------------------------------------------------------------------------------
+-- CONSTANTS
+--------------------------------------------------------------------------------
+local DISTANCE_ERROR_VAL = 1000000
+local DEFAULT_FAR_AWAY = 100000
+
+-- Map of mutant technical names to human readable descriptions
+local MUTANT_NAME_MAP = {
+    ["zombie"] = "Zombie",
+    ["rat"] = "Rat",
+    ["tushkano"] = "Tushkano",
+    ["boar"] = "Boar (bulletproof head)", -- or the AI will keep talking about shooting them in the head
+    ["flesh"] = "Flesh (mutant pig, relatively passive)",
+    ["pseudodog"] = "Pseudodog",
+    ["cat"] = "Mutant Cat",
+    ["fracture"] = "Fracture",
+    ["snork"] = "Snork",
+    ["lurker"] = "Lurker",
+    ["bloodsucker"] = "Bloodsucker",
+    ["psy_dog"] = "Psy Dog",
+    ["burer"] = "Burer",
+    ["controller"] = "Controller",
+    ["poltergeist"] = "Poltergeist",
+    ["psysucker"] = "Psysucker",
+    ["chimera"] = "Chimera (extremely dangerous!)",
+    ["gigant"] = "Pseudogiant (extremely dangerous!)",
+    ["karlik"] = "Karlik",
+    ["dog"] = "Dog" -- always check dog last to not pick it over pseudodog or psy_dog
+}
+
+--------------------------------------------------------------------------------
+-- UTILITIES
+--------------------------------------------------------------------------------
+
+--- Validates that an object exists, else errors
+-- @param obj The object to check
+-- @param func_name Name of the calling function for error reporting
 function must_exist(obj, func_name)
     if not obj then
         error(func_name .. " called with nil object")
     end
 end
 
--- Execute a function within a protected call and log any errors
+--- Execute a function within a protected call and log any errors
+-- @param func The function to call
+-- @param ... Arguments to pass to the function
 function try(func, ...)
     local status, result = pcall(func, ...)
     if not status then
@@ -22,7 +61,9 @@ function get_game_path()
     return getFS():update_path("$game_config$", "") .. "\\"
 end
 
+--------------------------------------------------------------------------------
 -- OBJECTS
+--------------------------------------------------------------------------------
 
 function get_technical_name(object)
     must_exist(object, "get_technical_name")
@@ -57,7 +98,9 @@ function is_artifact(obj)
     return obj:is_artefact() -- base game
 end
 
+--------------------------------------------------------------------------------
 -- PLAYER
+--------------------------------------------------------------------------------
 
 function get_player()
     return db.actor
@@ -76,7 +119,9 @@ function is_player_alive()
     return db.actor:alive()
 end
 
+--------------------------------------------------------------------------------
 -- CHARACTER
+--------------------------------------------------------------------------------
 
 function is_stalker(object)
     must_exist(object, "is_stalker")
@@ -105,36 +150,14 @@ function get_name(creature)
     return creature:character_name() or describe_mutant(creature)
 end
 
--- Function to get human-readable names for mutants based on patterns in their technical names
+--- Function to get human-readable names for mutants based on patterns in their technical names
+-- @param mutant The mutant object
+-- @return String description of the mutant
 function describe_mutant(mutant)
     must_exist(mutant, "describe_mutant")
     local mutant_technical_name = get_technical_name(mutant)
-    -- TODO move to XML or replace entirely with pre-existing function
-    local patternToNameMap = {
-        ["zombie"] = "Zombie",
-        ["rat"] = "Rat",
-        ["tushkano"] = "Tushkano",
-        ["boar"] = "Boar (bulletproof head)", -- or the AI will keep talking about shooting them in the head
-        ["flesh"] = "Flesh (mutant pig, relatively passive)",
-        ["pseudodog"] = "Pseudodog",
-        ["cat"] = "Mutant Cat",
-        ["fracture"] = "Fracture",
-        ["snork"] = "Snork",
-        ["lurker"] = "Lurker",
-        ["bloodsucker"] = "Bloodsucker",
-        ["psy_dog"] = "Psy Dog",
-        ["burer"] = "Burer",
-        ["controller"] = "Controller",
-        ["poltergeist"] = "Poltergeist",
-        ["psysucker"] = "Psysucker",
-        ["chimera"] = "Chimera (extremely dangerous!)",
-        ["gigant"] = "Pseudogiant (extremely dangerous!)",
-        ["karlik"] = "Karlik",
-        ["dog"] = "Dog" -- always check dog last to not pick it over pseudodog or psy_dog
-        -- Add more patterns as needed...
-    }
-
-    for pattern, name in pairs(patternToNameMap) do
+    
+    for pattern, name in pairs(MUTANT_NAME_MAP) do
         if string.find(mutant_technical_name, pattern) then
             return "a " .. name
         end
@@ -152,7 +175,9 @@ function get_weapon(npc)
     return npc:active_item()
 end
 
+--------------------------------------------------------------------------------
 -- RELATIONS
+--------------------------------------------------------------------------------
 
 function get_relations(observer, target)
     return try(observer.relation, observer, target) or 1
@@ -171,7 +196,9 @@ function are_enemies(observer, target)
     return relations == game_object.enemy
 end
 
+--------------------------------------------------------------------------------
 -- SQUADS
+--------------------------------------------------------------------------------
 
 function get_squad(obj)
     return try(get_object_squad, obj)
@@ -181,7 +208,9 @@ function is_companion(npc)
     return npc:has_info("npcx_is_companion")
 end
 
+--------------------------------------------------------------------------------
 -- COMBAT
+--------------------------------------------------------------------------------
 
 function get_enemies_fighting_player()
     return xr_combat_ignore.fighting_with_actor_npcs
@@ -211,7 +240,9 @@ function is_in_combat(npc)
     return is_npc_in_combat(npc) or is_enemy_fighting_player(npc) -- doesnt seem reliable?
 end
 
+--------------------------------------------------------------------------------
 -- FACTIONS
+--------------------------------------------------------------------------------
 
 function get_faction(npc)
     local faction = try(character_community, npc) or "no faction"
@@ -226,7 +257,10 @@ function get_real_player_faction()
     return get_actor_true_community()
 end
 
+--------------------------------------------------------------------------------
 -- WORLD
+--------------------------------------------------------------------------------
+
 function get_location_technical_name()
     return level.name() or ''
 end
@@ -241,7 +275,6 @@ function iterate_nearest(location, distance, fun)
 end
 
 function is_living_character(obj)
-    -- must_exist(obj, "is_living_character") -- Optimization: removed redundant check
     return obj and is_stalker(obj) and obj:alive()
 end
 
@@ -250,7 +283,6 @@ function get_nearby_characters(center_object, distance, max, exclusion_list)
     -- Validate and set defaults for optional parameters
     distance = distance or config.EVENT_WITNESS_RANGE
     exclusion_list = exclusion_list or {}
-
 
     local location = get_position(center_object)
     if location == nil then return {} end
@@ -326,7 +358,7 @@ function get_distance_between(obj1, obj2)
     -- Check if either object is nil
     if not obj1 or not obj2 then
         log.errors("get_distance_between called with nil object, defaulting to far away")
-        return 100000
+        return DEFAULT_FAR_AWAY
     end
 
     -- Check if both objects are the same
@@ -343,7 +375,7 @@ function get_distance_between(obj1, obj2)
         log.errors("Error in distance_between_actually_safe: ", result)
 
         -- Return a large number to indicate error
-        return 1000000
+        return DISTANCE_ERROR_VAL
     end
 
     -- Return the calculated distance
@@ -366,7 +398,7 @@ end
 -- Load a translated string from the game's XML files
 function load_xml(input)
     if not input then return "" end
-    if not input then return "" end
+    -- Removed redundant nil check
     local key = "talker_" .. input -- Fix: Localize key
     local result = game.translate_string("talker_" .. input) or game.translate_string(input)
     if result == key then
@@ -380,7 +412,7 @@ function load_random_xml(input)
     local translations = {}
     local baseKey = "talker_" .. input
     local i = 1
-    while true do -- always a good idea, right?
+    while true do
         local key = baseKey .. "_" .. i
         local translation = game.translate_string(key)
         if translation == key then break end
@@ -394,38 +426,33 @@ function load_random_xml(input)
     end
 end
 
+--------------------------------------------------------------------------------
 -- HUD
+--------------------------------------------------------------------------------
 
 function display_hud_message(message)
     actor_menu.set_msg(1, message, 3)
 end
 
+--------------------------------------------------------------------------------
 -- SOUND
+--------------------------------------------------------------------------------
 
 function play_sound(sound_name)
     xr_sound.set_sound_play(AC_ID, sound_name)
 end
 
+--------------------------------------------------------------------------------
 -- NEWS TIP
+--------------------------------------------------------------------------------
 
 function send_news_tip(sender_name, message, image, showtime)
     db.actor:give_game_news(sender_name, message, image, 0, showtime)
 end
 
-
-
--- Check if the sender is valid
-function is_living_character(character)
-    return is_stalker(character) and character:alive()
-end
-
-
-
 --------------------------------------------------------------------------------
 -- UNIQUE NPCS
 --------------------------------------------------------------------------------
--- TODO: This would work better as an xml with a key value pair format
-
 
 function Set(t)
     local s = {}
@@ -735,4 +762,3 @@ end
 function is_loaded()
     return true
 end
-

@@ -35,6 +35,11 @@ function is_valid_callout(npc_obj, target_obj)
 
     -- Relation Check
     if not queries.are_enemies(npc_obj, target_obj) then return false end
+    
+    -- Same Faction Check (Fix for Friendly Callouts)
+    if queries.get_faction(npc_obj) == queries.get_faction(target_obj) then
+        return false
+    end
 
     -- Companion Alignment: 
     -- If the spotter is a companion, ensure the target is ALSO an enemy of the player.

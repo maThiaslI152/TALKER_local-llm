@@ -10,6 +10,7 @@ local game = require("infra.game_adapter")
 local interface = require("interface.interface")
 -- Import game interface modules
 local queries = talker_game_queries
+
 ----------------------------------------------------------------------------------------------------
 -- Constants
 ----------------------------------------------------------------------------------------------------
@@ -19,15 +20,22 @@ local INTERACTION_DISTANCE = 1
 ----------------------------------------------------------------------------------------------------
 -- Conditions
 ----------------------------------------------------------------------------------------------------
-local LAST_ANOMALY_COMMENT = 0
+local last_anomaly_comment_time = 0
 
+--- Checks if the event is valid (cooldown and distance)
+-- @param anomaly The anomaly object
+-- @return true if valid, false otherwise
 function is_valid_event(anomaly)
     local player = queries.get_player()
-    is_valid =
-        game.is_cooldown_over(LAST_ANOMALY_COMMENT, ANOMALY_COMMENT_CD) and
-        queries.distance_between(player, anomaly) > INTERACTION_DISTANCE
-    -- reset cooldown
-    if is_valid then LAST_ANOMALY_COMMENT = queries.get_game_time_ms() end
+    local is_valid =
+        game.is_cooldown_over(last_anomaly_comment_time, ANOMALY_COMMENT_CD) and
+        queries.get_distance_between(player, anomaly) > INTERACTION_DISTANCE
+    
+    -- reset cooldown if valid
+    if is_valid then 
+        last_anomaly_comment_time = queries.get_game_time_ms() 
+    end
+    
     return is_valid
 end
 

@@ -17,7 +17,7 @@ local queries = talker_game_queries
 -- CONDITIONS
 --------------------------------------------------------------------------------------------
 local last_taunt_time_ms = 0
-local taunt_cooldown_ms = 5 * 60 * 1000
+local taunt_cooldown_ms = 45 * 1000
 function someone_should_taunt(npc_obj)
     local is_valid =
         (queries.get_game_time_ms() - last_taunt_time_ms) > taunt_cooldown_ms and

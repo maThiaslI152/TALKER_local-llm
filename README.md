@@ -88,3 +88,33 @@ This mod is a fork of the original **TALKER** by **Danclave**.
     *   And the entire Anomaly modding community.
 
 *   **Fork Modifications**: Adaptation for exclusive local LLM support, removal of paid API code/voice/proxy features, codebase optimization.
+
+## Developer Guide
+
+### Architecture Overview
+
+TALKER follows a simple event-driven architecture:
+
+1.  **Triggers (`gamedata/scripts/talker_trigger_*.script`)**:
+    *   Listen for in-game callbacks (e.g., `actor_on_feeling_anomaly`, `npc_on_death`).
+    *   Validate the event (cooldowns, distances).
+    *   If valid, dispatch an event to the LLM interface.
+
+2.  **Core Utilities (`gamedata/scripts/talker_game_queries.script`)**:
+    *   Provides a safe abstraction layer over the raw X-Ray Engine API.
+    *   Handles common tasks like checking distances, getting object names, and describing the world state.
+
+3.  **Interface (`gamedata/scripts/talker_interface.script`)**:
+    *   Manages the connection to the Local LLM.
+    *   Constructs the prompt based on the event and game state.
+
+### Key Scripts
+
+*   `talker_game_queries.script`: The central library for all game state queries. Contains:
+    *   `get_player()`: Returns the actor object.
+    *   `describe_world(speaker, listener)`: Generates a natural language description of the current weather, time, and location.
+    *   `get_nearby_characters(center, distance)`: Finds valid conversation partners.
+
+*   `talker_mcm.script`: Handles the Mod Configuration Menu (MCM) settings.
+    *   `local_url`: The endpoint for the main "Smart" model.
+    *   `local_url_fast`: The endpoint for the secondary "Fast" model.
